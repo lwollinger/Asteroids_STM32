@@ -66,6 +66,21 @@ const osThreadAttr_t defaultTask_attributes = {
 uint16_t ADC_buffer[2];
 uint16_t valor_ADC[2];
 
+volatile uint8_t tiro_ativo = 0;
+volatile uint16_t tiro_x = 0;
+volatile uint16_t tiro_y = 0;
+volatile uint32_t nave_x = 70, nave_y = 70;
+
+typedef struct {
+    int x, y;
+    int dx, dy;
+    uint8_t tamanho; // 2 = grande, 1 = pequeno
+    uint8_t ativo;
+} Asteroide;
+
+#define MAX_ASTEROIDES 5
+Asteroide asteroides[MAX_ASTEROIDES]; // MAX_ASTEROIDES
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +105,49 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 		valor_ADC[1]=ADC_buffer[1];
 }
 
+void gerar_asteroide_menor(int origem_x, int origem_y, int direcao) {
+    for (int i = 0; i < MAX_ASTEROIDES; i++) {
+        if (!asteroides[i].ativo) {
+            asteroides[i].x = origem_x;
+            asteroides[i].y = origem_y;
+            asteroides[i].dx = direcao * 1;
+            asteroides[i].dy = (direcao > 0) ? -1 : 1;
+            asteroides[i].tamanho = 1;
+            asteroides[i].ativo = 1;
+            break;
+        }
+    }
+}
+
+void checar_colisao_tiro() {
+    if (!tiro_ativo) return;
+
+    for (int i = 0; i < MAX_ASTEROIDES; i++) {
+        if (asteroides[i].ativo && colisao_tiro_asteroide(tiro_x, tiro_y, &asteroides[i])) {
+
+            // Apaga o asteroide da tela
+            ST7735_draw_figure(asteroides[i].x, asteroides[i].y,
+                               (asteroides[i].tamanho == 2 ? asteroide_grande : asteroide_pequeno),
+                               ST7735_BLACK);
+
+            asteroides[i].ativo = 0;
+            tiro_ativo = 0;
+
+            // Gera 2 asteroides menores se o que explodiu era grande
+            if (asteroides[i].tamanho == 2) {
+                gerar_asteroide_menor(asteroides[i].x, asteroides[i].y, 1);
+                gerar_asteroide_menor(asteroides[i].x, asteroides[i].y, -1);
+            }
+            break;
+        }
+    }
+}
+
+
+
+
+
+
 //---------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------
@@ -97,53 +155,61 @@ void vTask_Move_Nave(void *pvParameters)
 {
 	// Nave comeca em (70,70)
 
-	uint32_t x=70,y=70;
-	uint32_t dif_eixoX,dif_eixoY;
+
+	uint32_t dif_eixoX, dif_eixoY;
 
 	while(1)
 	{
-		ST7735_FillRectangle(x, y, 8, 8, ST7735_BLACK); // apaga soldado anterior
+		ST7735_FillRectangle(nave_x, nave_y, 9, 9, ST7735_BLACK);
 
 		dif_eixoX = valor_ADC[1]; // media_eixoX;
 		dif_eixoY = valor_ADC[0]; //media_eixoY;
 
-		if(dif_eixoX < 1800)   // aprox. 200 de segurança
-		{
-			if(x>0) x--;
+		if(dif_eixoX < 1800){   // aprox. 200 de segurança
+			if(nave_x>0) nave_x--;
 		}
-		else if(dif_eixoX > 3800) // 50 = Delta de tolerancia no deslocamento do eixo
-		{
-			if(x<150) x++;
+		else if(dif_eixoX > 3800){ // 50 = Delta de tolerancia no deslocamento do eixo
+			if(nave_x<150) nave_x++;
 		}
 		// ------------------------------------------------------------------------
-		if(dif_eixoY < 1800)
-		{
-			if(y>0) y--;
-
+		if(dif_eixoY < 1800){
+			if(nave_y>0) nave_y--;
 		}
-		else if(dif_eixoY > 3800)
-		{
-			if(y<120) y++;
+		else if(dif_eixoY > 3800){
+			if(nave_y<120) nave_y++;
 		}
 		// ------------------------------------------------------------------------
-		ST7735_draw_figure(x, y, nave, ST7735_PINK);
-
+		ST7735_draw_figure(nave_x, nave_y, nave, ST7735_PINK);
 		vTaskDelay(20);
 	}
 }
 //---------------------------------------------------------------------------------------------------
 void vTask_Move_Tiro(void *pvParameters)
 {
-	uint32_t = tiro_x;
-	uint32_t = tiro_y;
-	while(1)
-	{
-		tiro_x = valor_ADC[0];
-		tiro_y = valor_ADC[1];
-		//ST7735_draw_figure(9, 30, tiro, ST7735_BLUE);
+    while(1){
 
-		vTaskDelay(500);
-	}
+        // Se o botão foi pressionado e não há tiro ativo, dispara da posição da nave
+        if(!HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_15) && tiro_ativo == 0) {
+            tiro_x = nave_x + 4;
+            tiro_y = nave_y;
+            tiro_ativo = 1;
+        }
+
+        if(tiro_ativo == 1){
+            // Apaga o tiro anterior
+        	ST7735_FillRectangle(tiro_x, tiro_y, 5, 5,  ST7735_BLACK);
+
+            // Atualiza posição do tiro (subindo)
+            if(tiro_y > 0){
+                tiro_y--; // move pra cima
+                ST7735_DrawPixel(tiro_x, tiro_y, ST7735_YELLOW);
+            } else{
+                tiro_ativo = 0; // tiro saiu da tela
+            }
+        }
+
+        vTaskDelay(20); // controla velocidade do tiro
+    }
 }
 //---------------------------------------------------------------------------------------------------
 void vTask_Print_ValorADC(void *pvParameters)

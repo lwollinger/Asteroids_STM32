@@ -12,8 +12,11 @@ typedef struct {
 
 
 extern FigDef pirata;
-//extern FigDef fig_campo_minado;
+
 extern FigDef nave;
+extern FigDef asteroide2;
+extern FigDef asteroide3;
+extern FigDef asteroide4;
 
 extern FigDef tiro;
 
