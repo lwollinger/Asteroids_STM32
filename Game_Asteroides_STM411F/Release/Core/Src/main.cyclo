@@ -1,0 +1,14 @@
+../Core/Src/main.c:163:6:vTask_Print_ValorADC	1
+../Core/Src/main.c:179:6:vTask_Pilha_Coloca_Valor	1
+../Core/Src/main.c:264:6:vTask_Personagem_Pilha_Movimento	4
+../Core/Src/main.c:203:6:vTask_Move_Soldado_Pilha_Movimento	3
+../Core/Src/main.c:310:6:vTask_Display	2
+../Core/Src/main.c:683:6:StartDefaultTask	1
+../Core/Src/main.c:103:6:HAL_ADC_ConvCpltCallback	1
+../Core/Src/main.c:113:6:vTask_Move_Soldado	9
+../Core/Src/main.c:153:6:vTask_Print_Soldado	1
+../Core/Src/main.c:189:6:vTask_Pilha_Tira_Valor	1
+../Core/Src/main.c:468:6:SystemClock_Config	3
+../Core/Src/main.c:342:5:main	6
+../Core/Src/main.c:704:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:721:6:Error_Handler	1

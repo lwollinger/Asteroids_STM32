@@ -1,0 +1,14 @@
+../Core/Src/main.c:163:6:vTask_Print_ValorADC	24	static
+../Core/Src/main.c:179:6:vTask_Pilha_Coloca_Valor	16	static
+../Core/Src/main.c:264:6:vTask_Personagem_Pilha_Movimento	72	static
+../Core/Src/main.c:203:6:vTask_Move_Soldado_Pilha_Movimento	72	static
+../Core/Src/main.c:310:6:vTask_Display	64	static
+../Core/Src/main.c:683:6:StartDefaultTask	8	static
+../Core/Src/main.c:103:6:HAL_ADC_ConvCpltCallback	0	static
+../Core/Src/main.c:113:6:vTask_Move_Soldado	32	static
+../Core/Src/main.c:153:6:vTask_Print_Soldado	16	static
+../Core/Src/main.c:189:6:vTask_Pilha_Tira_Valor	32	static
+../Core/Src/main.c:468:6:SystemClock_Config	88	static,ignoring_inline_asm
+../Core/Src/main.c:342:5:main	80	static,ignoring_inline_asm
+../Core/Src/main.c:704:6:HAL_TIM_PeriodElapsedCallback	0	static
+../Core/Src/main.c:721:6:Error_Handler	0	static,ignoring_inline_asm
